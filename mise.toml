@@ -24,3 +24,9 @@ description = "input의 현대카드 보안 HTML 사용내역을 CSV로 output�
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
 run = ".venv/bin/python decrypt_hyundaicard_html.py"
+
+[tasks.shcard]
+description = "input의 신한카드 보안 HTML 사용내역을 CSV로 output에 저장"
+dir = "{{ config_root }}"
+depends = ["kt:setup"]
+run = ".venv/bin/python decrypt_shcard_html.py"

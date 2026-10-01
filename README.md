@@ -2,19 +2,27 @@
 
 Python 3.9 이상에서 실행합니다. `input` 폴더 바로 아래에서 파일명에 `KT email 명세서`가 포함된 PDF를 찾아 저장된 암호로 해제합니다. 맥의 한글 분해형 파일명과 `.PDF` 확장자도 인식합니다.
 
-기본 경로는 실행한 터미널 위치와 관계없이 프로그램 파일이 있는 루트 기준입니다.
+기본 경로는 실행한 터미널 위치와 관계없이 `script` 폴더의 상위 폴더인 프로젝트 루트 기준입니다.
 
 ```text
 청구서 정리/
-├── decrypt_kt_pdfs.py
-├── kt_password.txt     # 암호 하나를 한 줄로 저장
+├── script/             # 처리 스크립트, tests/, requirements.txt
+├── secret/             # 서비스별 암호 파일 (Git 제외)
 ├── input/              # 읽을 PDF
 └── output/             # 암호가 해제된 PDF
 ```
 
 ## 설치 및 실행
 
-mise가 설치되어 있으면, `kt_password.txt`에 암호를 저장하고 `input`에 PDF를 넣은 뒤 다음 명령으로 실행하세요.
+모든 처리 스크립트를 한 번에 실행하려면 서비스별 암호 파일과 `input`의 청구서를 준비한 뒤 실행하세요.
+
+```sh
+mise run all
+```
+
+공통 가상환경과 패키지를 한 번 준비한 뒤 KT, 현대카드, 신한카드(보안 HTML·암호 없는 HTML), 삼성생명 작업을 병렬 실행합니다. 결과는 `output`에 저장됩니다. 삼성생명은 재실행할 때도 번호를 붙여 새 CSV를 생성합니다. 한 작업이 실패해도 나머지 작업을 계속 실행하려면 `mise run --continue-on-error all`을 사용하세요.
+
+mise가 설치되어 있으면, `secret/kt_password.txt`에 암호를 저장하고 `input`에 PDF를 넣은 뒤 다음 명령으로 실행하세요.
 
 ```sh
 mise run kt
@@ -38,21 +46,21 @@ mise run kt -- --help
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r script/requirements.txt
 ```
 
-`input`에 처리할 PDF를 넣고, 루트의 빈 `kt_password.txt`에 암호 하나를 한 줄로 입력해 저장하세요. 또는 다음 명령으로 저장할 수 있습니다. 입력은 화면에 표시되지 않습니다.
+`input`에 처리할 PDF를 넣고, `secret/kt_password.txt`에 암호 하나를 한 줄로 입력해 저장하세요. 또는 다음 명령으로 저장할 수 있습니다. `secret` 폴더가 없으면 자동으로 생성합니다. 입력은 화면에 표시되지 않습니다.
 
 ```sh
-python3 decrypt_kt_pdfs.py --save-password
+python3 script/decrypt_kt_pdfs.py --save-password
 ```
 
-암호는 `kt_password.txt`에 평문으로 저장됩니다. macOS/Linux에서는 프로그램으로 저장 시 파일 소유자에게만 읽기·쓰기 권한을 부여합니다. 암호 파일을 공유하거나 버전 관리에 추가하지 마세요. 앞자리 0도 그대로 보존됩니다. `--save-password`는 비어 있는 파일에만 저장하며, 이미 내용이 있으면 덮어쓰지 않습니다.
+암호는 `secret/kt_password.txt`에 평문으로 저장됩니다. macOS/Linux에서는 프로그램으로 저장 시 파일 소유자에게만 읽기·쓰기 권한을 부여합니다. 암호 파일을 공유하거나 버전 관리에 추가하지 마세요. 앞자리 0도 그대로 보존됩니다. `--save-password`는 비어 있는 파일에만 저장하며, 이미 내용이 있으면 덮어쓰지 않습니다.
 
 PDF 암호 해제:
 
 ```sh
-python3 decrypt_kt_pdfs.py
+python3 script/decrypt_kt_pdfs.py
 ```
 
 결과는 파일명 끝의 `(문서열기암호：주민번호 앞 6자리)`를 제거해 `output` 폴더에 저장됩니다. 예: `2026년 7월 KT email 명세서.pdf`. 한글 분해형 파일명과 일반 콜론(`:`)도 인식합니다. `input`의 원본 내용과 파일명은 보존되며, 정리된 출력 파일명이 이미 존재하면 건너뜁니다. 이전 실행에서 생성한 긴 이름의 출력 파일은 그대로 남습니다. 파일별로 실패해도 나머지는 계속 처리합니다. 모든 PDF에 같은 암호를 사용합니다.
@@ -60,13 +68,13 @@ python3 decrypt_kt_pdfs.py
 이미 저장해 둔 암호 파일을 사용하려면 UTF-8 텍스트 파일에 암호 하나만 한 줄로 저장한 뒤 경로를 지정하세요.
 
 ```sh
-python3 decrypt_kt_pdfs.py --password-file "/경로/저장된암호.txt"
+python3 script/decrypt_kt_pdfs.py --password-file "/경로/저장된암호.txt"
 ```
 
 다른 입력·출력 폴더 지정:
 
 ```sh
-python3 decrypt_kt_pdfs.py "/경로/청구서" --password-file "/경로/저장된암호.txt" --output-dir "/경로/결과"
+python3 script/decrypt_kt_pdfs.py "/경로/청구서" --password-file "/경로/저장된암호.txt" --output-dir "/경로/결과"
 ```
 
 선택한 경로에 공백이 있으면 따옴표로 감싸세요. 상대 경로 옵션은 현재 터미널 폴더 기준입니다. 재실행 시에는 `source .venv/bin/activate`로 가상환경을 먼저 활성화하세요.
@@ -77,7 +85,7 @@ python3 decrypt_kt_pdfs.py "/경로/청구서" --password-file "/경로/저장�
 
 ## 현대카드 HTML → CSV
 
-`input` 바로 아래의 `hyundaicard`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). 현대카드 암호는 루트의 `hyundaicard_password.txt`에 한 줄로 저장하세요. KT 암호와 별도로 관리하며, 앞자리 0도 보존합니다.
+`input` 바로 아래의 `hyundaicard`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). 현대카드 암호는 `secret/hyundaicard_password.txt`에 한 줄로 저장하세요. KT 암호와 별도로 관리하며, 앞자리 0도 보존합니다.
 
 ```sh
 mise run hyundaicard
@@ -94,8 +102,8 @@ mise run hyundaicard -- --save-password
 mise 없이 실행하거나 경로를 지정할 수도 있습니다. 위의 설치 절차로 패키지를 준비한 뒤 실행하세요.
 
 ```sh
-.venv/bin/python decrypt_hyundaicard_html.py
-.venv/bin/python decrypt_hyundaicard_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
+.venv/bin/python script/decrypt_hyundaicard_html.py
+.venv/bin/python script/decrypt_hyundaicard_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
 ```
 
 예: `input/hyundaicard_20261001.html` → `output/hyundaicard_20261001.csv`
@@ -110,12 +118,12 @@ mise 없이 실행하거나 경로를 지정할 수도 있습니다. 위의 설�
 검증 테스트:
 
 ```sh
-.venv/bin/python -m unittest discover -s tests
+PYTHONPATH=script .venv/bin/python -m unittest discover -s script/tests
 ```
 
 ## 신한카드 HTML → CSV
 
-`input` 바로 아래에서 `shcard`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). 루트의 `shcard_password.txt`에 암호 하나를 한 줄로 저장한 뒤 실행하세요. 앞자리 0을 보존하며 다른 카드의 암호 파일과 별도로 사용합니다. 암호 파일은 Git에서 제외됩니다.
+`input` 바로 아래에서 `shcard`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). `secret/shcard_password.txt`에 암호 하나를 한 줄로 저장한 뒤 실행하세요. 앞자리 0을 보존하며 다른 카드의 암호 파일과 별도로 사용합니다. 암호 파일은 Git에서 제외됩니다.
 
 ```sh
 mise run shcard
@@ -124,8 +132,8 @@ mise run shcard
 mise 없이 실행하거나 경로를 지정할 수도 있습니다. 필요한 패키지는 위의 설치 절차와 같습니다.
 
 ```sh
-.venv/bin/python decrypt_shcard_html.py
-.venv/bin/python decrypt_shcard_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
+.venv/bin/python script/decrypt_shcard_html.py
+.venv/bin/python script/decrypt_shcard_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
 ```
 
 예: `input/shcard_20261011_0001_555567442.html` → `output/shcard_20261011_0001_555567442.csv`
@@ -147,8 +155,8 @@ mise run shinhancard
 mise 없이 실행하거나 입력·출력 폴더를 지정할 수도 있습니다. 설치 절차는 위와 같습니다.
 
 ```sh
-.venv/bin/python extract_shinhancard_html.py
-.venv/bin/python extract_shinhancard_html.py "/경로/청구서" --output-dir "/경로/결과"
+.venv/bin/python script/extract_shinhancard_html.py
+.venv/bin/python script/extract_shinhancard_html.py "/경로/청구서" --output-dir "/경로/결과"
 ```
 
 예: `input/shinhancard_20261010_555567442.html` → `output/shinhancard_20261010_555567442.csv`
@@ -161,7 +169,7 @@ mise 없이 실행하거나 입력·출력 폴더를 지정할 수도 있습니�
 
 ## 삼성생명 HTML → CSV
 
-`input` 바로 아래에서 `SamsungLife`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). 루트의 `SamsungLife_password.txt`에 암호 하나를 한 줄로 저장한 뒤 실행하세요. 앞자리 0도 보존합니다. 암호 파일은 Git에서 제외됩니다.
+`input` 바로 아래에서 `SamsungLife`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). `secret/SamsungLife_password.txt`에 암호 하나를 한 줄로 저장한 뒤 실행하세요. 앞자리 0도 보존합니다. 암호 파일은 Git에서 제외됩니다.
 
 ```sh
 mise run samsunglife
@@ -170,8 +178,8 @@ mise run samsunglife
 mise 없이 실행하거나 경로를 지정할 수도 있습니다. 필요한 패키지는 기존 설치 절차와 같습니다.
 
 ```sh
-.venv/bin/python decrypt_samsunglife_html.py
-.venv/bin/python decrypt_samsunglife_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
+.venv/bin/python script/decrypt_samsunglife_html.py
+.venv/bin/python script/decrypt_samsunglife_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
 ```
 
 예: 차기납입일이 `2026-08-10`이면 `output/SamsungLife_20260810.csv`로 저장합니다. 같은 이름이 있으면 `SamsungLife_20260810_1.csv`, `SamsungLife_20260810_2.csv`처럼 비어 있는 번호를 순서대로 붙입니다. 재실행 시에도 다음 사용 가능한 번호로 새 CSV를 저장합니다.

@@ -17,7 +17,7 @@ import tempfile
 
 from decrypt_kt_pdfs import read_password
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 def matches(path):
@@ -141,6 +141,7 @@ def save_password(path):
         raise ValueError("암호는 비어 있지 않은 한 줄이어야 합니다.")
     if password != getpass.getpass("암호 다시 입력: "):
         raise ValueError("입력한 암호가 서로 다릅니다.")
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
     with os.fdopen(fd, "r+", encoding="utf-8") as stream:
         if stream.read():
@@ -153,7 +154,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("folder", nargs="?", type=Path, default=ROOT_DIR / "input")
     parser.add_argument("--output-dir", type=Path, default=ROOT_DIR / "output")
-    parser.add_argument("--password-file", type=Path, default=ROOT_DIR / "hyundaicard_password.txt")
+    parser.add_argument("--password-file", type=Path, default=ROOT_DIR / "secret" / "hyundaicard_password.txt")
     parser.add_argument("--save-password", action="store_true")
     args = parser.parse_args(argv)
     try:

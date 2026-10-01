@@ -11,7 +11,7 @@ import sys
 from decrypt_shcard_html import CardTableParser
 from decrypt_hyundaicard_html import write_csv
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 HEADERS = ['이용일자', '이용카드', '이용가맹점', '이용원금', '수수료',
            '할인금액', '입금완납금액', '입금하실 금액', '캐시백', '포인트적립율(마이신한)']
 

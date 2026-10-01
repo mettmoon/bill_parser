@@ -1,3 +1,7 @@
+[tasks.all]
+description = "KT, 현대카드, 신한카드, 삼성생명 청구서 일괄 처리"
+depends = ["kt", "hyundaicard", "shcard", "shinhancard", "samsunglife"]
+
 [tasks."kt:setup"]
 description = "KT PDF 처리용 가상환경과 패키지 준비"
 hide = true
@@ -7,9 +11,9 @@ set -eu
 if [ ! -x .venv/bin/python ]; then
   python3 -m venv .venv
 fi
-if ! cmp -s requirements.txt .venv/kt-requirements.txt || ! .venv/bin/python -c 'import pypdf, cryptography' 2>/dev/null; then
-  .venv/bin/python -m pip install -r requirements.txt
-  cp requirements.txt .venv/kt-requirements.txt
+if ! cmp -s script/requirements.txt .venv/kt-requirements.txt || ! .venv/bin/python -c 'import pypdf, cryptography' 2>/dev/null; then
+  .venv/bin/python -m pip install -r script/requirements.txt
+  cp script/requirements.txt .venv/kt-requirements.txt
 fi
 '''
 
@@ -17,28 +21,28 @@ fi
 description = "input의 KT 명세서 PDF 암호를 해제해 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
-run = ".venv/bin/python decrypt_kt_pdfs.py"
+run = ".venv/bin/python script/decrypt_kt_pdfs.py"
 
 [tasks.hyundaicard]
 description = "input의 현대카드 보안 HTML 사용내역을 CSV로 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
-run = ".venv/bin/python decrypt_hyundaicard_html.py"
+run = ".venv/bin/python script/decrypt_hyundaicard_html.py"
 
 [tasks.shcard]
 description = "input의 신한카드 보안 HTML 사용내역을 CSV로 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
-run = ".venv/bin/python decrypt_shcard_html.py"
+run = ".venv/bin/python script/decrypt_shcard_html.py"
 
 [tasks.shinhancard]
 description = "input의 암호 없는 신한카드 HTML 사용내역을 CSV로 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
-run = ".venv/bin/python extract_shinhancard_html.py"
+run = ".venv/bin/python script/extract_shinhancard_html.py"
 
 [tasks.samsunglife]
 description = "input의 삼성생명 보안 HTML 대출 납입내역을 CSV로 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
-run = ".venv/bin/python decrypt_samsunglife_html.py"
+run = ".venv/bin/python script/decrypt_samsunglife_html.py"

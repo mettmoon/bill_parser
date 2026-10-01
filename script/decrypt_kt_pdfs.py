@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unicodedata
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 def matches(path):
@@ -34,6 +34,7 @@ def save_password(path):
     if password != getpass.getpass("암호 다시 입력: "):
         raise ValueError("입력한 암호가 서로 다릅니다.")
     # 빈 준비 파일은 사용할 수 있지만, 저장된 암호는 덮어쓰지 않습니다.
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
     with os.fdopen(fd, "r+", encoding="utf-8") as stream:
         if stream.read():
@@ -85,7 +86,7 @@ def main(argv=None):
     parser.add_argument("folder", nargs="?", type=Path, default=ROOT_DIR / "input",
                         help="PDF가 있는 폴더 (기본: 프로그램 루트/input, 하위 폴더 제외)")
     parser.add_argument("--password-file", type=Path,
-                        help="UTF-8 암호 파일 (기본: 프로그램 루트/kt_password.txt)")
+                        help="UTF-8 암호 파일 (기본: 프로젝트 루트/secret/kt_password.txt)")
     parser.add_argument("--output-dir", type=Path,
                         help="저장 폴더 (기본: 프로그램 루트/output)")
     parser.add_argument("--save-password", action="store_true",
@@ -93,7 +94,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     folder = args.folder.expanduser().resolve()
     password_file = (args.password_file.expanduser() if args.password_file
-                     else ROOT_DIR / "kt_password.txt")
+                     else ROOT_DIR / "secret" / "kt_password.txt")
     output_dir = (args.output_dir.expanduser() if args.output_dir
                   else ROOT_DIR / "output")
 
@@ -112,7 +113,7 @@ def main(argv=None):
         try:
             import pypdf  # noqa: F401
         except ImportError:
-            print("필수 패키지를 설치해 주세요: python3 -m pip install -r requirements.txt",
+            print("필수 패키지를 설치해 주세요: python3 -m pip install -r script/requirements.txt",
                   file=sys.stderr)
             return 1
         password = read_password(password_file)

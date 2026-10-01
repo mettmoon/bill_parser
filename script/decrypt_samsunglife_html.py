@@ -15,7 +15,7 @@ import re
 from decrypt_hyundaicard_html import write_csv
 from decrypt_kt_pdfs import read_password
 
-ROOT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 def matches(path):
@@ -224,7 +224,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('folder', nargs='?', type=Path, default=ROOT_DIR / 'input')
     parser.add_argument('--output-dir', type=Path, default=ROOT_DIR / 'output')
-    parser.add_argument('--password-file', type=Path, default=ROOT_DIR / 'SamsungLife_password.txt')
+    parser.add_argument('--password-file', type=Path, default=ROOT_DIR / 'secret' / 'SamsungLife_password.txt')
     args = parser.parse_args(argv)
     try:
         sources = sorted(p for p in args.folder.expanduser().iterdir() if matches(p))

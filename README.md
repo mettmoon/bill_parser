@@ -74,3 +74,41 @@ python3 decrypt_kt_pdfs.py "/경로/청구서" --password-file "/경로/저장�
 출력은 다시 열어 암호화 해제 여부와 페이지 수를 검증한 뒤 저장합니다. PDF 구조를 다시 저장하므로 기존 전자서명의 유효성은 보존되지 않을 수 있습니다.
 
 참고: [pypdf 공식 암호 해제 문서](https://pypdf.readthedocs.io/en/stable/user/encryption-decryption.html)
+
+## 현대카드 HTML → CSV
+
+`input` 바로 아래의 `hyundaicard`로 시작하는 `.html`/`.htm` 파일을 처리합니다(대소문자 무관). 현대카드 암호는 루트의 `hyundaicard_password.txt`에 한 줄로 저장하세요. KT 암호와 별도로 관리하며, 앞자리 0도 보존합니다.
+
+```sh
+mise run hyundaicard
+```
+
+암호를 화면에 표시하지 않고 저장하려면:
+
+```sh
+mise run hyundaicard -- --save-password
+```
+
+기존 암호가 있으면 덮어쓰지 않습니다. 암호 파일은 평문이므로 공유하지 마세요. Git에서는 제외됩니다. `--save-password`로 저장하면 소유자만 읽고 쓸 수 있습니다.
+
+mise 없이 실행하거나 경로를 지정할 수도 있습니다. 위의 설치 절차로 패키지를 준비한 뒤 실행하세요.
+
+```sh
+.venv/bin/python decrypt_hyundaicard_html.py
+.venv/bin/python decrypt_hyundaicard_html.py "/경로/청구서" --password-file "/경로/암호.txt" --output-dir "/경로/결과"
+```
+
+예: `input/hyundaicard_20261001.html` → `output/hyundaicard_20261001.csv`
+
+- 현재 명세서의 VestMail SEED-CBC 보안 형식을 지원합니다. 브라우저나 외부 접속 없이 복호화하고, HTML의 JavaScript를 실행하지 않고 결제상세내역 원본 데이터를 읽습니다.
+- CSV에는 이용일, 사용자, 이용카드, 이용가맹점, 이용금액, 할부개월, 할부회차, 결제원금, 수수료(이자), 결제후잔액, 적립할인율(%), 예상적립할인, 정기결제, 결제방식코드가 포함됩니다. 정기결제는 원본의 Y/N, 결제방식코드는 원본 값을 보존합니다.
+- 이용일은 `YYYY-MM-DD`, 금액은 천 단위 쉼표 없는 숫자로 저장합니다. UTF-8 BOM으로 저장해 Excel에서도 한글을 읽을 수 있습니다.
+- 소계·총합계 행만 제외합니다. 동일하게 보이는 실제 거래, 취소·조정 행, 결제원금 0원 행도 보존하므로 명세서의 요약 건수와 CSV 행 수가 다를 수 있습니다. 해외 거래도 결제상세내역에 포함된 원화 금액으로 저장하며, 별도 해외 상세 표와 취소 안내 표는 중복 추가하지 않습니다.
+- 원본 HTML은 그대로 두며 복호화한 HTML은 저장하지 않습니다. CSV가 이미 있으면 건너뜁니다. 다시 생성하려면 기존 CSV를 다른 곳으로 옮긴 뒤 실행하세요.
+- 암호가 틀리거나 형식을 읽을 수 없는 파일은 실패로 표시하고 나머지 파일은 계속 처리합니다. 실패가 있으면 종료 코드는 1입니다.
+
+검증 테스트:
+
+```sh
+.venv/bin/python -m unittest discover -s tests
+```

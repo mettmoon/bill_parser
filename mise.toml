@@ -18,3 +18,9 @@ description = "input의 KT 명세서 PDF 암호를 해제해 output에 저장"
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
 run = ".venv/bin/python decrypt_kt_pdfs.py"
+
+[tasks.hyundaicard]
+description = "input의 현대카드 보안 HTML 사용내역을 CSV로 output에 저장"
+dir = "{{ config_root }}"
+depends = ["kt:setup"]
+run = ".venv/bin/python decrypt_hyundaicard_html.py"

@@ -1,9 +1,7 @@
 .venv/
 .DS_Store
 __pycache__/
-pdf_password.txt
+*_password.txt
 암호해제/
-kt_password.txt
 input/
 output/
-hyundaicard_password.txt

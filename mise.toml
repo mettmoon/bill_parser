@@ -36,3 +36,9 @@ description = "input의 암호 없는 신한카드 HTML 사용내역을 CSV로 o
 dir = "{{ config_root }}"
 depends = ["kt:setup"]
 run = ".venv/bin/python extract_shinhancard_html.py"
+
+[tasks.samsunglife]
+description = "input의 삼성생명 보안 HTML 대출 납입내역을 CSV로 output에 저장"
+dir = "{{ config_root }}"
+depends = ["kt:setup"]
+run = ".venv/bin/python decrypt_samsunglife_html.py"

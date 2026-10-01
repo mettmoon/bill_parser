@@ -1,0 +1,20 @@
+[tasks."kt:setup"]
+description = "KT PDF 처리용 가상환경과 패키지 준비"
+hide = true
+dir = "{{ config_root }}"
+run = '''
+set -eu
+if [ ! -x .venv/bin/python ]; then
+  python3 -m venv .venv
+fi
+if ! cmp -s requirements.txt .venv/kt-requirements.txt || ! .venv/bin/python -c 'import pypdf, cryptography' 2>/dev/null; then
+  .venv/bin/python -m pip install -r requirements.txt
+  cp requirements.txt .venv/kt-requirements.txt
+fi
+'''
+
+[tasks.kt]
+description = "input의 KT 명세서 PDF 암호를 해제해 output에 저장"
+dir = "{{ config_root }}"
+depends = ["kt:setup"]
+run = ".venv/bin/python decrypt_kt_pdfs.py"
